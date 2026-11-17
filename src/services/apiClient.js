@@ -1,29 +1,30 @@
+import axios from 'axios'
 import { ApiError } from './apiError.js'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+// one axios instance for the whole app
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: { 'Content-Type': 'application/json' },
+})
 
-export async function apiRequest(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...(options.body && !(options.body instanceof FormData)
-        ? { 'Content-Type': 'application/json' }
-        : {}),
-      ...options.headers,
-    },
-  })
+// runs before EVERY request
+api.interceptors.request.use((config) => {
+  // later: attach the auth token here
+  return config
+})
 
-  const contentType = response.headers.get('content-type') ?? ''
-  const data = contentType.includes('application/json')
-    ? await response.json()
-    : await response.text()
+// runs after EVERY response
+api.interceptors.response.use(
+  // success: return only the body, so callers get { data, meta } directly
+  (response) => response.data,
+  // failure: turn any error into an ApiError with a readable message
+  (error) =>
+    Promise.reject(
+      new ApiError(
+        error.response?.data?.message || error.message || 'Something went wrong',
+        { status: error.response?.status, data: error.response?.data },
+      ),
+    ),
+)
 
-  if (!response.ok) {
-    throw new ApiError(data?.message ?? response.statusText, {
-      status: response.status,
-      data,
-    })
-  }
-
-  return data
-}
+export default api
