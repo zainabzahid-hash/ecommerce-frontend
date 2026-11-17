@@ -3,6 +3,7 @@ import { Box, List, ListItemButton, ListItemText } from '@mui/material'
 // add a line here for every new admin screen
 const items = [
     { label: 'Categories', href: '/admin' },
+    { label: 'Products', href: '/admin/products' },
 ]
 
 export default function Sidebar() {
