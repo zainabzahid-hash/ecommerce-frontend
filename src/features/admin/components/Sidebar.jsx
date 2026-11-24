@@ -4,6 +4,7 @@ import { Box, List, ListItemButton, ListItemText } from '@mui/material'
 const items = [
     { label: 'Categories', href: '/admin' },
     { label: 'Products', href: '/admin/products' },
+    { label: 'Attributes', href: '/admin/attributes' },
 ]
 
 export default function Sidebar() {
